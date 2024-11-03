@@ -4,6 +4,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 # Download NLTK data if not already available
 nltk.download('punkt')
 nltk.download('punkt_tab')
@@ -47,16 +48,41 @@ knowledge_base = {
 }
 
 def match_query_to_text(service_name, query):
+    # Retrieve the content for the specified service
     service_content = knowledge_base.get(service_name, {})
-    query_tokens = [word for word in word_tokenize(query.lower()) if word.isalnum() and word not in stop_words]
-    relevant_text = ""
-    for part_name, content in service_content.items():
-        sentences = content.split("\n")
-        for sentence in sentences:
-            sentence_tokens = [word for word in word_tokenize(sentence.lower()) if word.isalnum()]
-            if all(word in sentence_tokens for word in query_tokens):
-                relevant_text += sentence + "\n"
-    return relevant_text if relevant_text else "I'm sorry, I couldn't find an answer in the PDF content."
+    
+    # Determine the relevant section based on keywords in the query
+    if any(keyword in query.lower() for keyword in ["overview", "introduction", "basics"]):
+        section = "overview"
+    elif any(keyword in query.lower() for keyword in ["setup", "get started", "usage"]):
+        section = "getting_started"
+    elif any(keyword in query.lower() for keyword in ["features", "advanced", "details"]):
+        section = "advanced_features"
+    elif any(keyword in query.lower() for keyword in ["pricing", "cost", "limitations"]):
+        section = "pricing_and_limitations"
+    else:
+        # If no specific keywords match, search across all sections
+        section = None
+
+    # Embed the query
+    query_embedding = model.encode([query])[0]
+
+    # Initialize a variable to store the best match
+    best_match = None
+    highest_similarity = -1
+
+    # Search within the specified section or all sections if no section is specified
+    sections_to_search = [section] if section else service_content.keys()
+
+    for sec in sections_to_search:
+        for paragraph, embedding in service_content[sec]:
+            # Calculate similarity
+            similarity = cosine_similarity([query_embedding], [embedding])[0][0]
+            if similarity > highest_similarity:
+                highest_similarity = similarity
+                best_match = paragraph
+    
+    return best_match if best_match else "I'm sorry, I couldn't find an answer in the PDF content."
 
 def aws_chatbot(service_name, user_question):
     if any(keyword in user_question.lower() for keyword in ["overview", "introduction", "basics"]):
