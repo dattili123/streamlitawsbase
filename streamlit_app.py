@@ -3,12 +3,15 @@ import fitz  # PyMuPDF
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-
+from sentence_transformers import SentenceTransformer
 # Download NLTK data if not already available
 nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('stopwords')
 stop_words = set(stopwords.words("english"))
+
+# Load the sentence transformer model
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Define the text extraction and chatbot functions
 def extract_and_split_text(pdf_path):
@@ -18,19 +21,23 @@ def extract_and_split_text(pdf_path):
             page = doc[page_num]
             document_text += page.get_text() + "\n"
     
-    # Split text into four parts
+    # Split text into four sections based on length
     split_length = len(document_text) // 4
-    part1 = document_text[:split_length]
-    part2 = document_text[split_length:split_length*2]
-    part3 = document_text[split_length*2:split_length*3]
-    part4 = document_text[split_length*3:]
-    
-    return {
-        "part1": part1,
-        "part2": part2,
-        "part3": part3,
-        "part4": part4
+    sections = {
+        "overview": document_text[:split_length],
+        "getting_started": document_text[split_length:split_length*2],
+        "advanced_features": document_text[split_length*2:split_length*3],
+        "pricing_and_limitations": document_text[split_length*3:]
     }
+    
+    # Create embeddings for each paragraph within each section
+    section_embeddings = {}
+    for section_name, section_text in sections.items():
+        paragraphs = section_text.split("\n\n")  # Split by double newline to get paragraphs
+        embeddings = model.encode(paragraphs)     # Generate embeddings for each paragraph
+        section_embeddings[section_name] = list(zip(paragraphs, embeddings))
+
+    return section_embeddings
 
 # Initialize the knowledge base
 knowledge_base = {
