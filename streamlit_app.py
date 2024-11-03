@@ -6,6 +6,7 @@ from nltk.tokenize import word_tokenize
 
 # Download NLTK data if not already available
 nltk.download('punkt')
+nltk.download('punkt_tab')
 nltk.download('stopwords')
 stop_words = set(stopwords.words("english"))
 
