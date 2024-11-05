@@ -1,4 +1,4 @@
-# 🎈 Blank app template
+# 🎈 AWS Knowledge Chatbot
 
 A simple Streamlit app template for you to modify!
 
