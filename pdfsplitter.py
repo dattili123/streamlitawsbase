@@ -1,10 +1,7 @@
-import os
-from PyPDF2 import PdfReader, PdfWriter
-
 def split_pdf_by_size(input_pdf_path, output_dir, max_size_in_mb=1):
     """
     Split a single PDF into multiple smaller PDFs based on the specified size.
-    
+
     :param input_pdf_path: Path to the input PDF file.
     :param output_dir: Directory where the split PDFs will be saved.
     :param max_size_in_mb: Maximum size for each split PDF in MB.
@@ -46,11 +43,3 @@ def split_pdf_by_size(input_pdf_path, output_dir, max_size_in_mb=1):
         with open(output_file, "wb") as final_file:
             writer.write(final_file)
         print(f"Saved {output_file} with size {os.path.getsize(output_file) / (1024 * 1024):.2f} MB")
-
-if __name__ == "__main__":
-    # Example usage
-    input_pdf = "./example.pdf"  # Path to the input PDF
-    output_directory = "./output_pdfs"  # Directory to save split PDFs
-    max_pdf_size = 1  # Maximum size of each split PDF in MB
-
-    split_pdf_by_size(input_pdf, output_directory, max_pdf_size)
