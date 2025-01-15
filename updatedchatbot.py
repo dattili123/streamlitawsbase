@@ -2,9 +2,12 @@ import os
 import shutil
 import json
 import re
-from pypdf2 import PdfReader
+from PyPDF2 import PdfReader, PdfWriter
 from pathlib import Path
 import boto3
+
+source_directory = "./docs"
+target_directory = "./processed_data"
 
 def move_and_categorize_pdfs(source_dir, target_dir):
     """Move and categorize PDFs based on size."""
@@ -53,16 +56,20 @@ def extract_text_from_pdfs(pdf_dir):
 def query_llm_bedrock(prompt, aws_region="us-east-1"):
     """Query AWS Bedrock runtime for LLM responses."""
     client = boto3.client('bedrock-runtime', region_name=aws_region)
-
+    
+    payload = {
+        "inputText": prompt
+    }
+    
     response = client.invoke_model(
         modelId='amazon.titan-tg1-large',
         contentType='application/json',
         accept='application/json',
-        body=json.dumps({"prompt": prompt})
+        body=json.dumps(payload)
     )
 
     result = json.loads(response['body'].read().decode('utf-8'))
-    return result['output']
+    return result
 
 def chatbot_response(extracted_data, user_prompt):
     """Generate a chatbot response based on the user prompt."""
@@ -73,16 +80,13 @@ def chatbot_response(extracted_data, user_prompt):
     return response
 
 if __name__ == "__main__":
-    # Define directories
-    source_directory = "./pdfs"
-    target_directory = "./categorized_pdfs"
 
     # Step 1: Move and categorize PDFs
     categories = move_and_categorize_pdfs(source_directory, target_directory)
     print("PDFs categorized into:", categories)
 
     # Step 2: Extract text from categorized PDFs
-    extracted_text = extract_text_from_pdfs(target_directory)
+    extracted_text = extract_text_from_pdfs(source_directory)
 
     # Save extracted text to a JSON file for reference
     with open("extracted_data.json", "w") as json_file:
@@ -95,4 +99,6 @@ if __name__ == "__main__":
             break
 
         response = chatbot_response(extracted_text, user_input)
-        print("Chatbot response:", response)
+        chatbot_answer = response['results'][0].get('outputText')
+        print("Chatbot response:", chatbot_answer)
+       
