@@ -1,24 +1,17 @@
 import os
-import chromadb
-from chromadb.config import Settings
-from chromadb.utils import embedding_functions
 from PyPDF2 import PdfReader
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
 import json
 import boto3
 import logging
+import pickle
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# ChromaDB Settings
-persist_directory = "./chroma_db/loan_data"
-collection_name = "loan_data"
-
-# Initialize ChromaDB Client
-chroma_client = chromadb.PersistentClient(path=persist_directory)
-
-# Initialize Titan Embedding Function
-embedding_function = embedding_functions.TitanEmbeddingFunction()
+# Initialize the SentenceTransformer model
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Directory paths
 INPUT_DIR = "./input_pdfs"
@@ -88,8 +81,8 @@ def extract_and_split_text(pdf_path):
 # Function to generate embeddings for text chunks
 
 def generate_embeddings(text_chunks):
-    """Generate embeddings for a list of text chunks using Titan."""
-    return [(section, embedding_function(content)) for section, content in text_chunks]
+    """Generate embeddings for a list of text chunks."""
+    return [(section, model.encode([content])[0]) for section, content in text_chunks]
 
 # Function to process all PDFs and generate embeddings
 
@@ -118,7 +111,7 @@ def process_pdfs(input_dir, output_dir):
 
 def query_knowledge_base(query, knowledge_base):
     """Query the knowledge base using a user-provided query."""
-    query_embedding = embedding_function(query)
+    query_embedding = model.encode([query])[0]
     best_match = None
     highest_similarity = -1
 
