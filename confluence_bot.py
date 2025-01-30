@@ -19,7 +19,7 @@ logging.basicConfig(
 boto3_bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")  # Set your AWS region
 
 # ✅ Confluence API Details
-CONFLUENCE_BASE_URL = "https://confluence.fanniemae.com"
+CONFLUENCE_BASE_URL = "https://confluence.organization.com"
 PERSONAL_ACCESS_TOKEN = "your_personal_access_token"
 HEADERS = {
     "Authorization": f"Bearer {PERSONAL_ACCESS_TOKEN}",
