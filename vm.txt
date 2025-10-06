@@ -1,0 +1,16 @@
+Based on the VM Configuration Management Meeting transcript, here are the key points you can use for an update:
+
+1. The team is exploring centralized ways to manage VM sizes and configurations, potentially using a JSON or YAML file.
+
+2. There are ongoing discussions about simplifying VM size offerings, potentially reducing the current complex naming scheme to more standard sizes like small, medium, large.
+
+3. Daryl and Kerwin are working on consolidating hardware families into two main types, which will impact VM configurations.
+
+4. Next steps include:
+- Meeting with Daryl and Kerwin next week to finalize VM size menu
+- Reviewing updated documentation on the confluence site
+- Determining the best method for referencing VM sizing details
+
+5. The goal is to create a flexible, easily maintainable system for VM configuration that can adapt to future changes.
+
+Would you like me to elaborate on any of these points for your update?
